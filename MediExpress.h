@@ -5,18 +5,19 @@
 #ifndef P2_MEDIEXPRESS_H
 #define P2_MEDIEXPRESS_H
 
-#include "VectorDinamico.h"
-#include "ListaSimplementeEnlazada.h"
+#include <vector>
+#include <list>
+#include <map>
+
 #include "PA_Medicamento.h"
 #include "Laboratorio.h"
 #include "Farmacia.h"
-#include "ArbolAVL.h"
 
 class MediExpress {
 private:
-    VectorDinamico<PA_Medicamento> _medicamentos;
-    ListaSimplementeEnlazada<Laboratorio> _labs;
-    ArbolAVL<Farmacia> _pharmacy;
+    std::vector<Farmacia> _medicamentos;
+    std::list<Laboratorio> _labs;
+    std::map<int,PA_Medicamento> _pharmacy;
 
 public:
     VectorDinamico<Laboratorio*> buscarLabs(const std::string &nombrePa);
