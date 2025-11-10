@@ -162,17 +162,10 @@ int Farmacia::buscaMedicamID(int _id_num) {
  * @param _id_Num Identificador numérico del medicamento solicitado.
  * @pre La farmacia debe tener un puntero válido a MediExpress.
  */
-void Farmacia::pedidoMedicam(int _id_Num) {
+void Farmacia::pedidoMedicam(int _id_Num, int n) {
     if(linkMed){
-        linkMed->suministrarFarmacia(this,_id_Num);
+        linkMed->suministrarFarmacia(this,_id_Num,n);
     }
-}
-/**
- * @brief Añade un medicamento al inventario (lista de dispensación) de la farmacia.
- * @param pa Puntero al medicamento a insertar.
- */
-void Farmacia::dispensaMed(PA_Medicamento *pa) {
-    dispense._insertarPorElFinal(pa);
 }
 
 
@@ -186,11 +179,46 @@ Farmacia::Farmacia() :_Cif("---"),_Provincia("---"),_Localidad("---"),_Nombre("-
 
 }
 
-int Farmacia::comparMedicam(int _idNum, int numAComprar, PA_Medicamento &result) {
-    Stock auxiliar;
-    auxiliar.setIdPaMed(_idNum);
-    std::set<Stock>::iterator iterador = _order.find(auxiliar);
-    if(buscaMedicamID(_idNum) >= numAComprar){
-
+int Farmacia::comparMedicam(int _idNum, int numAComprar, PA_Medicamento* &result) {
+    if(buscaMedicamID(_idNum)>=numAComprar){
+        Stock auxiliar;
+        auxiliar.setIdPaMed(_idNum);
+        std::set<Stock>::iterator iterador = _order.find(auxiliar); //Hacemos esto porque a los set se le ha de pasar un objeto si o si
+        Stock auxiliar2= (*iterador);
+        _order.erase(iterador);
+        auxiliar2.decrementa(numAComprar);
+        _order.insert(auxiliar2);
+        result = _order.find(auxiliar2)->getNumber();
+    }else{
+        pedidoMedicam(_idNum,numAComprar);
+        result = nullptr;
     }
+    return buscaMedicamID(_idNum);
+
+}
+
+void Farmacia::nuevoStock(PA_Medicamento *pa, int n) {
+    Stock aux1;
+    aux1.setIdPaMed(pa->getIdNum());
+    std::set<Stock>::iterator iterator = _order.find(aux1);
+    if(iterator != _order.end()){
+        Stock aux2 = *iterator;
+        _order.erase(iterator);
+        aux2.incrementa(n);
+        _order.insert(aux2);
+    }else{
+        Stock nuevo(pa->getIdNum(), n, pa);
+        _order.insert(nuevo);
+    }
+}
+
+bool Farmacia::eliminarStock(int _idNum) {
+    Stock aux2;
+    aux2.setIdPaMed(_idNum);
+    std::set<Stock>::iterator iterator = _order.find(aux2);
+    if(iterator != _order.end()){
+        _order.erase(iterator);
+        return true;
+    }
+    return false;
 }

@@ -26,6 +26,7 @@ private:
     MediExpress *linkMed;
 
     int buscaMedicamID(int _id_num);
+    void pedidoMedicam(int _id_Num, int n);
 
 
 public:
@@ -33,11 +34,8 @@ public:
     const std::string &getCodPostal() const;
 
     Farmacia();
-    void pedidoMedicam(int _id_Num);
-
 
     const std::string &getCif() const;
-    void dispensaMed(PA_Medicamento *pa);
 
     void setCif(const std::string &cif);
 
@@ -66,7 +64,11 @@ public:
     void setCodPostal(const std::string &codPostal);
     void setDireccion(const std::string &direccion);
 
-    int comparMedicam(int _idNum, int numAComprar, PA_Medicamento &result);
+    int comparMedicam(int _idNum, int numAComprar, PA_Medicamento* &result);
+    void nuevoStock(PA_Medicamento *pa, int n);
+    bool eliminarStock(int _idNum);
+
+
 };
 
 
