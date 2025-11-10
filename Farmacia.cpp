@@ -4,6 +4,7 @@
 
 #include "Farmacia.h"
 #include "MediExpress.h"
+#include "Stock.h"
 
 /**
  * @brief Busca medicamentos por nombre (parcialmente) dentro de la farmacia y devuelve sus laboratorios.
@@ -11,7 +12,7 @@
  * @return Lista simplemente enlazada con punteros a laboratorios que suministran los medicamentos encontrados.
  * @note La búsqueda es sensible a mayúsculas/minúsculas y devuelve duplicados si se repiten laboratorios.
  */
-ListaSimplementeEnlazada<Laboratorio *> Farmacia::buscarMedicam(const std::string &nombreMedicam) {
+ListaSimplementeEnlazada<Laboratorio *> Farmacia::buscarMedicamNombre(const std::string &nombreMedicam) {
     ListaSimplementeEnlazada<Laboratorio*> toRet;
     ListaSimplementeEnlazada<PA_Medicamento*>::Iterador<PA_Medicamento*> it = dispense._elIterador();
     while(!it._esFinal()){
@@ -158,7 +159,7 @@ void Farmacia::setLinkMed(MediExpress *linkMed) {
 Farmacia::Farmacia(const std::string &cif, const std::string &provincia, const std::string &localidad,
                    const std::string &nombre, const std::string &direccion, const std::string &codPostal,
                    MediExpress *linkMed) : _Cif(cif), _Provincia(provincia), _Localidad(localidad), _Nombre(nombre),
-                                           _Direccion(direccion), _CodPostal(codPostal), linkMed(linkMed),dispense() {
+                                           _Direccion(direccion), _CodPostal(codPostal), linkMed(linkMed),_order() {
 
 }
 
@@ -177,16 +178,14 @@ bool Farmacia::operator>=(const Farmacia &rhs) const {
 * @param _id_num Identificador numérico del medicamento.
 * @return Puntero al medicamento encontrado o nullptr si no está en la farmacia.
 */
-PA_Medicamento *Farmacia::buscaMedicam(int _id_num) {
-    ListaSimplementeEnlazada<PA_Medicamento*>::Iterador<PA_Medicamento*> it = dispense._elIterador();
-    while(!it._esFinal()){
-        PA_Medicamento *ret = it._verDato();
-        if(ret->getIdNum()==_id_num){
-            return ret;
-        }
-        it._esSiguiente();
+int Farmacia::buscaMedicamID(int _id_num) {
+    Stock auxiliar;
+    auxiliar.setIdPaMed(_id_num);
+    std::set<Stock>::iterator i = _order.find(auxiliar);
+    if(i != _order.end()){
+        return i->getNumStock();
     }
-    return nullptr;
+    return 0;
 }
 /**
  * @brief Solicita un medicamento al sistema MediExpress.
@@ -212,7 +211,16 @@ void Farmacia::dispensaMed(PA_Medicamento *pa) {
  * Inicializa todos los campos con valores por defecto ("---") y punteros a nullptr.
  */
 Farmacia::Farmacia() :_Cif("---"),_Provincia("---"),_Localidad("---"),_Nombre("---"),_Direccion("---"),_CodPostal("---"),linkMed(
-        nullptr),dispense()
+        nullptr),_order()
 {
 
+}
+
+int Farmacia::comparMedicam(int _idNum, int numAComprar, PA_Medicamento &result) {
+    Stock auxiliar;
+    auxiliar.setIdPaMed(_idNum);
+    std::set<Stock>::iterator iterador = _order.find(auxiliar);
+    if(buscaMedicamID(_idNum) >= numAComprar){
+
+    }
 }

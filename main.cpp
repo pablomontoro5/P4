@@ -131,7 +131,7 @@ int main(int argc, const char * argv[]) {
         int i5 =0;
         while(i5 < 27){
             _farmaciaAuxiliar = medi.buscarFarmacia(cif[i5]);
-            if(!_farmaciaAuxiliar->buscaMedicam(_idDelMedicamentoPedido)){ //Si no está, hace el pedido del medicamento
+            if(!_farmaciaAuxiliar->buscaMedicamID(_idDelMedicamentoPedido)){ //Si no está, hace el pedido del medicamento
                 _farmaciaAuxiliar->pedidoMedicam(_idDelMedicamentoPedido);
             }
             ++i5;
@@ -148,7 +148,8 @@ int main(int argc, const char * argv[]) {
         while(i6 < 27){
             _farmaciaAuxiliar = medi.buscarFarmacia(cif[i6]);
             if(_farmaciaAuxiliar){
-                ListaSimplementeEnlazada<Laboratorio*> _listaDeLaboratoriosAuxiliar = _farmaciaAuxiliar->buscarMedicam("VIRUS");
+                ListaSimplementeEnlazada<Laboratorio*> _listaDeLaboratoriosAuxiliar = _farmaciaAuxiliar->buscarMedicamNombre(
+                        "VIRUS");
                 cont2+=_listaDeLaboratoriosAuxiliar._getTamanio();
             }
             ++i6;
