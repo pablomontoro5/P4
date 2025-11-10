@@ -18,6 +18,10 @@ public:
     Stock(int idPaMed, unsigned int numStock, PA_Medicamento *number);
     Stock(const Stock &_unaCopia);
 
+    PA_Medicamento *getNumber() const;
+
+    void setNumber(PA_Medicamento *number);
+
     virtual ~Stock();
 
     void decrementa(int n);
