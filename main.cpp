@@ -15,7 +15,7 @@
 int main(int argc, const char * argv[]) {
 
     try{
-
+        
     }catch(std::runtime_error &rte){
         std::cerr << rte.what() << std::endl;
     }catch(std::out_of_range &oor){
