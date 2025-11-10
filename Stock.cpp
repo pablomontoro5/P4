@@ -54,3 +54,11 @@ bool Stock::operator<=(const Stock &rhs) const {
 bool Stock::operator>=(const Stock &rhs) const {
     return !(*this < rhs);
 }
+
+PA_Medicamento *Stock::getNumber() const {
+    return number;
+}
+
+void Stock::setNumber(PA_Medicamento *number) {
+    Stock::number = number;
+}

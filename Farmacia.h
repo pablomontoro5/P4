@@ -7,8 +7,12 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <set>
+#include <list>
+#include <vector>
+
 #include "PA_Medicamento.h"
-#include "ListaSimplementeEnlazada.h"
+#include "Stock.h"
 class MediExpress;
 class Farmacia {
 public:
@@ -18,8 +22,11 @@ public:
 
 private:
     std::string _Cif,_Provincia,_Localidad,_Nombre,_Direccion,_CodPostal;
-    ListaSimplementeEnlazada<PA_Medicamento*> dispense;
+    std::set<Stock> _order;
     MediExpress *linkMed;
+
+    int buscaMedicamID(int _id_num);
+    void pedidoMedicam(int _id_Num, int n);
 
 
 public:
@@ -27,31 +34,23 @@ public:
     const std::string &getCodPostal() const;
 
     Farmacia();
-    void pedidoMedicam(int _id_Num);
-
 
     const std::string &getCif() const;
-    void dispensaMed(PA_Medicamento *pa);
 
     void setCif(const std::string &cif);
-    PA_Medicamento* buscaMedicam(int _id_num);
 
 
     const std::string &getProvincia() const;
-    ListaSimplementeEnlazada<Laboratorio*> buscarMedicam(const std::string &nombreMedicam);
+    std::vector<PA_Medicamento*> buscarMedicamNombre(const std::string &nombreMedicam);
 
 
     void setProvincia(const std::string &provincia);
-    bool operator<(const Farmacia &rhs) const;
 
     const std::string &getLocalidad() const;
-    bool operator>(const Farmacia &rhs) const;
 
     void setLocalidad(const std::string &localidad);
-    bool operator<=(const Farmacia &rhs) const;
 
     const std::string &getNombre() const;
-    bool operator>=(const Farmacia &rhs) const;
 
 
     void setNombre(const std::string &nombre);
@@ -64,6 +63,10 @@ public:
 
     void setCodPostal(const std::string &codPostal);
     void setDireccion(const std::string &direccion);
+
+    int comparMedicam(int _idNum, int numAComprar, PA_Medicamento* &result);
+    void nuevoStock(PA_Medicamento *pa, int n);
+    bool eliminarStock(int _idNum);
 
 
 };

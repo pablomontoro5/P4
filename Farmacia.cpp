@@ -4,6 +4,7 @@
 
 #include "Farmacia.h"
 #include "MediExpress.h"
+#include "Stock.h"
 
 /**
  * @brief Busca medicamentos por nombre (parcialmente) dentro de la farmacia y devuelve sus laboratorios.
@@ -11,16 +12,16 @@
  * @return Lista simplemente enlazada con punteros a laboratorios que suministran los medicamentos encontrados.
  * @note La búsqueda es sensible a mayúsculas/minúsculas y devuelve duplicados si se repiten laboratorios.
  */
-ListaSimplementeEnlazada<Laboratorio *> Farmacia::buscarMedicam(const std::string &nombreMedicam) {
-    ListaSimplementeEnlazada<Laboratorio*> toRet;
-    ListaSimplementeEnlazada<PA_Medicamento*>::Iterador<PA_Medicamento*> it = dispense._elIterador();
-    while(!it._esFinal()){
-        if(it._verDato()->getNombre().find(nombreMedicam)!=std::string::npos){
-            toRet._insertarPorElFinal(it._verDato()->servidoPor());
-        }
-        it._esSiguiente();
-    }
-    return toRet;
+std::vector<PA_Medicamento *> Farmacia::buscarMedicamNombre(const std::string &nombreMedicam) {
+   std::vector<PA_Medicamento*> toRet;
+   std::set<Stock>::iterator iterator = _order.begin();
+   while(iterator != _order.end()){
+       if(iterator->getNumber()->getNombre().find(nombreMedicam) != std::string::npos){
+           toRet.push_back(iterator->getNumber());
+       }
+       iterator++;
+   }
+   return toRet;
 }
 
 /**
@@ -37,14 +38,7 @@ const std::string &Farmacia::getCif() const {
 void Farmacia::setCif(const std::string &cif) {
     _Cif = cif;
 }
-/**
- * @brief Operador menor que, compara farmacias por su CIF.
- * @param rhs Farmacia con la que se compara.
- * @return true si el CIF de esta farmacia es menor que el de rhs.
- */
-bool Farmacia::operator<(const Farmacia &rhs) const {
-    return _Cif < rhs._Cif;
-}
+
 /**
  * @brief Obtiene la provincia donde se encuentra la farmacia.
  * @return Referencia constante a la provincia.
@@ -59,14 +53,7 @@ const std::string &Farmacia::getProvincia() const {
 void Farmacia::setProvincia(const std::string &provincia) {
     _Provincia = provincia;
 }
-/**
- * @brief Operador menor o igual que, compara farmacias por su CIF.
- * @param rhs Farmacia con la que se compara.
- * @return true si el CIF de esta farmacia es menor o igual que el de rhs.
- */
-bool Farmacia::operator<=(const Farmacia &rhs) const {
-    return !(rhs < *this);
-}
+
 /**
  * @brief Obtiene la localidad de la farmacia.
  * @return Referencia constante a la localidad.
@@ -88,14 +75,7 @@ void Farmacia::setLocalidad(const std::string &localidad) {
 const std::string &Farmacia::getNombre() const {
     return _Nombre;
 }
-/**
- * @brief Operador mayor que, compara farmacias por su CIF.
- * @param rhs Farmacia con la que se compara.
- * @return true si el CIF de esta farmacia es mayor que el de rhs.
- */
-bool Farmacia::operator>(const Farmacia &rhs) const {
-    return rhs < *this;
-}
+
 /**
  * @brief Establece el nombre de la farmacia.
  * @param nombre Nuevo nombre.
@@ -158,52 +138,34 @@ void Farmacia::setLinkMed(MediExpress *linkMed) {
 Farmacia::Farmacia(const std::string &cif, const std::string &provincia, const std::string &localidad,
                    const std::string &nombre, const std::string &direccion, const std::string &codPostal,
                    MediExpress *linkMed) : _Cif(cif), _Provincia(provincia), _Localidad(localidad), _Nombre(nombre),
-                                           _Direccion(direccion), _CodPostal(codPostal), linkMed(linkMed),dispense() {
+                                           _Direccion(direccion), _CodPostal(codPostal), linkMed(linkMed),_order() {
 
 }
 
 
-
-/**
- * @brief Operador mayor o igual que, compara farmacias por su CIF.
- * @param rhs Farmacia con la que se compara.
- * @return true si el CIF de esta farmacia es mayor o igual que el de rhs.
- */
-bool Farmacia::operator>=(const Farmacia &rhs) const {
-    return !(*this < rhs);
-}
 /**
 * @brief Busca un medicamento en la farmacia por su identificador numérico.
 * @param _id_num Identificador numérico del medicamento.
 * @return Puntero al medicamento encontrado o nullptr si no está en la farmacia.
 */
-PA_Medicamento *Farmacia::buscaMedicam(int _id_num) {
-    ListaSimplementeEnlazada<PA_Medicamento*>::Iterador<PA_Medicamento*> it = dispense._elIterador();
-    while(!it._esFinal()){
-        PA_Medicamento *ret = it._verDato();
-        if(ret->getIdNum()==_id_num){
-            return ret;
-        }
-        it._esSiguiente();
+int Farmacia::buscaMedicamID(int _id_num) {
+    Stock auxiliar;
+    auxiliar.setIdPaMed(_id_num);
+    std::set<Stock>::iterator i = _order.find(auxiliar);
+    if(i != _order.end()){
+        return i->getNumStock();
     }
-    return nullptr;
+    return 0;
 }
 /**
  * @brief Solicita un medicamento al sistema MediExpress.
  * @param _id_Num Identificador numérico del medicamento solicitado.
  * @pre La farmacia debe tener un puntero válido a MediExpress.
  */
-void Farmacia::pedidoMedicam(int _id_Num) {
+void Farmacia::pedidoMedicam(int _id_Num, int n) {
     if(linkMed){
-        linkMed->suministrarFarmacia(this,_id_Num);
+        linkMed->suministrarFarmacia(this,_id_Num,n);
     }
-}
-/**
- * @brief Añade un medicamento al inventario (lista de dispensación) de la farmacia.
- * @param pa Puntero al medicamento a insertar.
- */
-void Farmacia::dispensaMed(PA_Medicamento *pa) {
-    dispense._insertarPorElFinal(pa);
 }
 
 
@@ -212,7 +174,51 @@ void Farmacia::dispensaMed(PA_Medicamento *pa) {
  * Inicializa todos los campos con valores por defecto ("---") y punteros a nullptr.
  */
 Farmacia::Farmacia() :_Cif("---"),_Provincia("---"),_Localidad("---"),_Nombre("---"),_Direccion("---"),_CodPostal("---"),linkMed(
-        nullptr),dispense()
+        nullptr),_order()
 {
 
+}
+
+int Farmacia::comparMedicam(int _idNum, int numAComprar, PA_Medicamento* &result) {
+    if(buscaMedicamID(_idNum)>=numAComprar){
+        Stock auxiliar;
+        auxiliar.setIdPaMed(_idNum);
+        std::set<Stock>::iterator iterador = _order.find(auxiliar); //Hacemos esto porque a los set se le ha de pasar un objeto si o si
+        Stock auxiliar2= (*iterador);
+        _order.erase(iterador);
+        auxiliar2.decrementa(numAComprar);
+        _order.insert(auxiliar2);
+        result = _order.find(auxiliar2)->getNumber();
+    }else{
+        pedidoMedicam(_idNum,numAComprar);
+        result = nullptr;
+    }
+    return buscaMedicamID(_idNum);
+
+}
+
+void Farmacia::nuevoStock(PA_Medicamento *pa, int n) {
+    Stock aux1;
+    aux1.setIdPaMed(pa->getIdNum());
+    std::set<Stock>::iterator iterator = _order.find(aux1);
+    if(iterator != _order.end()){
+        Stock aux2 = *iterator;
+        _order.erase(iterator);
+        aux2.incrementa(n);
+        _order.insert(aux2);
+    }else{
+        Stock nuevo(pa->getIdNum(), n, pa);
+        _order.insert(nuevo);
+    }
+}
+
+bool Farmacia::eliminarStock(int _idNum) {
+    Stock aux2;
+    aux2.setIdPaMed(_idNum);
+    std::set<Stock>::iterator iterator = _order.find(aux2);
+    if(iterator != _order.end()){
+        _order.erase(iterator);
+        return true;
+    }
+    return false;
 }
