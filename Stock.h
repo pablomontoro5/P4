@@ -9,13 +9,29 @@
 
 class Stock {
 private:
-    int id_PaMed;
-    int num_stock;
+    int id_PaMed; ///< Debe de coincidir siempre con el _idNumero de PA_Medicamento
+    unsigned int num_stock; ///< Numero de medicamentos que hay en la farmacia
     PA_Medicamento* number;
 
 public:
-    int decrementa(int n);
-    int incrementa(int n);
+    Stock();
+    Stock(int idPaMed, unsigned int numStock, PA_Medicamento *number);
+    Stock(const Stock &_unaCopia);
+
+    virtual ~Stock();
+
+    void decrementa(int n);
+    void incrementa(int n);
+
+    int getIdPaMed() const;
+    void setIdPaMed(int idPaMed);
+    unsigned int getNumStock() const;
+    void setNumStock(unsigned int numStock);
+
+    bool operator<(const Stock &rhs) const;
+    bool operator>(const Stock &rhs) const;
+    bool operator<=(const Stock &rhs) const;
+    bool operator>=(const Stock &rhs) const;
 };
 
 
