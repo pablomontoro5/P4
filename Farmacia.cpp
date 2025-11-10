@@ -12,16 +12,16 @@
  * @return Lista simplemente enlazada con punteros a laboratorios que suministran los medicamentos encontrados.
  * @note La búsqueda es sensible a mayúsculas/minúsculas y devuelve duplicados si se repiten laboratorios.
  */
-ListaSimplementeEnlazada<Laboratorio *> Farmacia::buscarMedicamNombre(const std::string &nombreMedicam) {
-    ListaSimplementeEnlazada<Laboratorio*> toRet;
-    ListaSimplementeEnlazada<PA_Medicamento*>::Iterador<PA_Medicamento*> it = dispense._elIterador();
-    while(!it._esFinal()){
-        if(it._verDato()->getNombre().find(nombreMedicam)!=std::string::npos){
-            toRet._insertarPorElFinal(it._verDato()->servidoPor());
-        }
-        it._esSiguiente();
-    }
-    return toRet;
+std::vector<PA_Medicamento *> Farmacia::buscarMedicamNombre(const std::string &nombreMedicam) {
+   std::vector<PA_Medicamento*> toRet;
+   std::set<Stock>::iterator iterator = _order.begin();
+   while(iterator != _order.end()){
+       if(iterator->getNumber()->getNombre().find(nombreMedicam) != std::string::npos){
+           toRet.push_back(iterator->getNumber());
+       }
+       iterator++;
+   }
+   return toRet;
 }
 
 /**
@@ -38,14 +38,7 @@ const std::string &Farmacia::getCif() const {
 void Farmacia::setCif(const std::string &cif) {
     _Cif = cif;
 }
-/**
- * @brief Operador menor que, compara farmacias por su CIF.
- * @param rhs Farmacia con la que se compara.
- * @return true si el CIF de esta farmacia es menor que el de rhs.
- */
-bool Farmacia::operator<(const Farmacia &rhs) const {
-    return _Cif < rhs._Cif;
-}
+
 /**
  * @brief Obtiene la provincia donde se encuentra la farmacia.
  * @return Referencia constante a la provincia.
@@ -60,14 +53,7 @@ const std::string &Farmacia::getProvincia() const {
 void Farmacia::setProvincia(const std::string &provincia) {
     _Provincia = provincia;
 }
-/**
- * @brief Operador menor o igual que, compara farmacias por su CIF.
- * @param rhs Farmacia con la que se compara.
- * @return true si el CIF de esta farmacia es menor o igual que el de rhs.
- */
-bool Farmacia::operator<=(const Farmacia &rhs) const {
-    return !(rhs < *this);
-}
+
 /**
  * @brief Obtiene la localidad de la farmacia.
  * @return Referencia constante a la localidad.
@@ -89,14 +75,7 @@ void Farmacia::setLocalidad(const std::string &localidad) {
 const std::string &Farmacia::getNombre() const {
     return _Nombre;
 }
-/**
- * @brief Operador mayor que, compara farmacias por su CIF.
- * @param rhs Farmacia con la que se compara.
- * @return true si el CIF de esta farmacia es mayor que el de rhs.
- */
-bool Farmacia::operator>(const Farmacia &rhs) const {
-    return rhs < *this;
-}
+
 /**
  * @brief Establece el nombre de la farmacia.
  * @param nombre Nuevo nombre.
@@ -164,15 +143,6 @@ Farmacia::Farmacia(const std::string &cif, const std::string &provincia, const s
 }
 
 
-
-/**
- * @brief Operador mayor o igual que, compara farmacias por su CIF.
- * @param rhs Farmacia con la que se compara.
- * @return true si el CIF de esta farmacia es mayor o igual que el de rhs.
- */
-bool Farmacia::operator>=(const Farmacia &rhs) const {
-    return !(*this < rhs);
-}
 /**
 * @brief Busca un medicamento en la farmacia por su identificador numérico.
 * @param _id_num Identificador numérico del medicamento.

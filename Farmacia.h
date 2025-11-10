@@ -8,6 +8,8 @@
 #include <stdexcept>
 #include <string>
 #include <set>
+#include <list>
+#include <vector>
 
 #include "PA_Medicamento.h"
 #include "Stock.h"
@@ -41,20 +43,16 @@ public:
 
 
     const std::string &getProvincia() const;
-    ListaSimplementeEnlazada<Laboratorio*> buscarMedicamNombre(const std::string &nombreMedicam);
+    std::vector<PA_Medicamento*> buscarMedicamNombre(const std::string &nombreMedicam);
 
 
     void setProvincia(const std::string &provincia);
-    bool operator<(const Farmacia &rhs) const;
 
     const std::string &getLocalidad() const;
-    bool operator>(const Farmacia &rhs) const;
 
     void setLocalidad(const std::string &localidad);
-    bool operator<=(const Farmacia &rhs) const;
 
     const std::string &getNombre() const;
-    bool operator>=(const Farmacia &rhs) const;
 
 
     void setNombre(const std::string &nombre);
