@@ -21,6 +21,7 @@ private:
 
 public:
     std::vector<Laboratorio*> buscarLabs(const std::string &nombrePa);
+    void suministrarFarmacia(Farmacia *f, int id_num, int n);
 
     void _cargarMedicamentosDesdeFichero(const std::string& _ficheroMedicamentos);
     void asignarParesYVerificar();
@@ -34,17 +35,14 @@ public:
 
     std::vector<Farmacia*> buscarFarmacias(const std::string &provincia);
     bool eliminarMedicamento(int id_num);
+
     void suministrarMed(PA_Medicamento *pa, Laboratorio *l);
+    PA_Medicamento* buscarCompuesto(int _idDelNumero);
 
     std::vector<Laboratorio*> buscarLabCiudad(const std::string &nombreCiudad);
     Farmacia* buscarFarmacia(const std::string &cif);
 
-
-
-
-    void suministrarFarmacia(Farmacia *f, int id_num, int n);
     std::vector<PA_Medicamento*> buscarCompuesto(const std::string &nombrePA);
-    PA_Medicamento* buscarCompuesto(int _idDelNumero);
 
 
     void asignarLabsMadridAMedicamentosSinAsignar();
