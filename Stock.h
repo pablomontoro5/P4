@@ -1,5 +1,5 @@
 //
-// Created by USUARIO on 10/11/2025.
+// Created by Lázaro Ruiz on 10/11/2025.
 //
 
 #ifndef P4_STOCK_H
@@ -15,26 +15,28 @@ private:
 
 public:
     Stock();
-    Stock(int idPaMed, unsigned int numStock, PA_Medicamento *number);
-    Stock(const Stock &_unaCopia);
-
-    PA_Medicamento *getNumber() const;
-
-    void setNumber(PA_Medicamento *number);
+    void decrementa(int n);
 
     virtual ~Stock();
+    Stock(int idPaMed, unsigned int numStock, PA_Medicamento *number);
 
-    void decrementa(int n);
-    void incrementa(int n);
-
-    int getIdPaMed() const;
     void setIdPaMed(int idPaMed);
+    Stock(const Stock &_unaCopia);
+
     unsigned int getNumStock() const;
-    void setNumStock(unsigned int numStock);
+    PA_Medicamento *getNumber() const;
 
     bool operator<(const Stock &rhs) const;
-    bool operator>(const Stock &rhs) const;
+    void setNumber(PA_Medicamento *number);
+
+    int getIdPaMed() const;
+    void incrementa(int n);
+
+
+    void setNumStock(unsigned int numStock);
     bool operator<=(const Stock &rhs) const;
+
+    bool operator>(const Stock &rhs) const;
     bool operator>=(const Stock &rhs) const;
 };
 
