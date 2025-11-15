@@ -32,6 +32,8 @@ public:
     std::vector<PA_Medicamento*> getMedicamentosSinLab();
     Laboratorio* buscarLab(const std::string &nombreLab);
 
+    std::vector<Farmacia*> buscarFarmacias(const std::string &provincia);
+    bool eliminarMedicamento(int id_num);
     void suministrarMed(PA_Medicamento *pa, Laboratorio *l);
 
     std::vector<Laboratorio*> buscarLabCiudad(const std::string &nombreCiudad);
