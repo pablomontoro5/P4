@@ -23,7 +23,7 @@ int main(int argc, const char * argv[]) {
         PA_Medicamento *_punteroAuxiliarPAM;
         for(int i=0; i< _vectorDeSevilla.size(); ++i){
             for(int j=0; j < 12; ++j){
-                int stockSevilla = _vectorDeSevilla[2]->comparMedicam(3640,1,_punteroAuxiliarPAM);
+                int stockSevilla = _vectorDeSevilla[2]->comprarMedicam(3640, 1, _punteroAuxiliarPAM);
                 if(_punteroAuxiliarPAM != nullptr){
                     std::cout << "*** Stock inicialmente disponible : " << stockSevilla << std::endl;
                     std::cout << "*** Nombre del medicamento *** : " << _punteroAuxiliarPAM->getNombre() << std::endl;
@@ -31,7 +31,7 @@ int main(int argc, const char * argv[]) {
                 if(stockSevilla){
                     std::cout << "*** Se ha comprado el medicamento con ID 3640 en el CIF : ***" << _vectorDeSevilla[i]->getCif() << std::endl;
                 }else{
-                    stockSevilla= _vectorDeSevilla[i]->comparMedicam(3632,1,_punteroAuxiliarPAM);
+                    stockSevilla= _vectorDeSevilla[i]->comprarMedicam(3632, 1, _punteroAuxiliarPAM);
                     if(_punteroAuxiliarPAM != nullptr){
                         std::cout << "*** Stock inicialmente disponible : " << stockSevilla << std::endl;
                         std::cout << "*** Nombre del medicamento *** : " << _punteroAuxiliarPAM->getNombre() << std::endl;
@@ -39,7 +39,7 @@ int main(int argc, const char * argv[]) {
                     if(stockSevilla){
                         std::cout << "*** Se ha comprado el medicamento con ID 3632 en el CIF : ***" << _vectorDeSevilla[i]->getCif() << std::endl;
                     }else{
-                        stockSevilla= _vectorDeSevilla[i]->comparMedicam(3633,1,_punteroAuxiliarPAM);
+                        stockSevilla= _vectorDeSevilla[i]->comprarMedicam(3633, 1, _punteroAuxiliarPAM);
                         if(_punteroAuxiliarPAM != nullptr){
                             std::cout << "*** Stock inicialmente disponible : " << stockSevilla << std::endl;
                             std::cout << "*** Nombre del medicamento *** :" << _punteroAuxiliarPAM->getNombre() << std::endl;
