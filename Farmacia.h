@@ -67,6 +67,7 @@ public:
     int comparMedicam(int _idNum, int numAComprar, PA_Medicamento* &result);
     void nuevoStock(PA_Medicamento *pa, int n);
     bool eliminarStock(int _idNum);
+    int contienePaMed(int id_num);
 
 
 };
