@@ -30,14 +30,15 @@ private:
 
 
 public:
+    void setDireccion(const std::string &direccion);
+    int contienePaMed(int id_num);
 
     const std::string &getCodPostal() const;
-
     Farmacia();
 
     const std::string &getCif() const;
+    void nuevoStock(PA_Medicamento *pa, int n);
 
-    void setCif(const std::string &cif);
 
 
     const std::string &getProvincia() const;
@@ -60,14 +61,12 @@ public:
     MediExpress *getLinkMed() const;
 
 
-
     void setCodPostal(const std::string &codPostal);
-    void setDireccion(const std::string &direccion);
+    int comprarMedicam(int _idNum, int numAComprar, PA_Medicamento* &result);
 
-    int comparMedicam(int _idNum, int numAComprar, PA_Medicamento* &result);
-    void nuevoStock(PA_Medicamento *pa, int n);
+
+    void setCif(const std::string &cif);
     bool eliminarStock(int _idNum);
-    int contienePaMed(int id_num);
 
 
 };

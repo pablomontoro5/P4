@@ -5,21 +5,42 @@
 #include "Farmacia.h"
 #include "MediExpress.h"
 #include "Stock.h"
-
 /**
- * @brief Busca medicamentos por nombre (parcialmente) dentro de la farmacia y devuelve sus laboratorios.
- * @param nombreMedicam Subcadena a buscar dentro del nombre del medicamento.
- * @return Lista simplemente enlazada con punteros a laboratorios que suministran los medicamentos encontrados.
- * @note La búsqueda es sensible a mayúsculas/minúsculas y devuelve duplicados si se repiten laboratorios.
+ * @brief Devuelve el stock actual de un medicamento en la farmacia.
+ * @param id_num Identificador numérico del medicamento.
+ * @return Cantidad de unidades en stock del medicamento con identificador @p id_num,
+ *         o 0 si no existe stock para ese medicamento.
+ * @note La búsqueda se realiza en el contenedor interno std::set<Stock> usando un objeto
+ *       Stock auxiliar con el mismo id de principio activo.
+ */
+int Farmacia::contienePaMed(int id_num) {
+    int toRet = 0;
+    Stock _auxiliarNumero4;
+    _auxiliarNumero4.setIdPaMed(id_num);
+
+    std::set<Stock>::iterator _it12= _order.find(_auxiliarNumero4);
+    if(_it12 != _order.end()){
+        toRet = _it12->getNumStock();
+    }
+    return toRet;
+}
+/**
+ * @brief Busca medicamentos por nombre (parcialmente) dentro de la farmacia.
+ * @param nombreMedicam Subcadena a buscar dentro del nombre de cada medicamento.
+ * @return std::vector dinámico con punteros a medicamentos (PA_Medicamento) cuyo nombre
+ *         contiene @p nombreMedicam. Puede estar vacío.
+ * @note La búsqueda recorre el contenedor interno std::set<Stock>, accediendo al
+ *       PA_Medicamento asociado a cada elemento Stock. La coincidencia usa std::string::find
+ *       y es sensible a mayúsculas/minúsculas.
  */
 std::vector<PA_Medicamento *> Farmacia::buscarMedicamNombre(const std::string &nombreMedicam) {
    std::vector<PA_Medicamento*> toRet;
-   std::set<Stock>::iterator iterator = _order.begin();
-   while(iterator != _order.end()){
-       if(iterator->getNumber()->getNombre().find(nombreMedicam) != std::string::npos){
-           toRet.push_back(iterator->getNumber());
+   std::set<Stock>::iterator _it14 = _order.begin();
+   while(_it14 != _order.end()){
+       if(_it14->getNumber()->getNombre().find(nombreMedicam) != std::string::npos){
+           toRet.push_back(_it14->getNumber());
        }
-       iterator++;
+       _it14++;
    }
    return toRet;
 }
@@ -31,13 +52,7 @@ std::vector<PA_Medicamento *> Farmacia::buscarMedicamNombre(const std::string &n
 const std::string &Farmacia::getCif() const {
     return _Cif;
 }
-/**
- * @brief Establece el código CIF de la farmacia.
- * @param cif Nuevo código CIF.
- */
-void Farmacia::setCif(const std::string &cif) {
-    _Cif = cif;
-}
+
 
 /**
  * @brief Obtiene la provincia donde se encuentra la farmacia.
@@ -84,6 +99,38 @@ void Farmacia::setNombre(const std::string &nombre) {
     _Nombre = nombre;
 }
 /**
+ * @brief Realiza la compra de un medicamento en la farmacia.
+ *
+ * Si hay stock suficiente del medicamento indicado, se descuenta del std::set<Stock> interno
+ * y se devuelve el stock restante. En ese caso, se devuelve también, por referencia, un puntero
+ * al medicamento comprado. Si no hay stock suficiente, se realiza un pedido al sistema MediExpress
+ * y el puntero resultado se establece a nullptr.
+ *
+ * @param _idNum Identificador numérico del medicamento a comprar.
+ * @param numAComprar Número de unidades que se desea adquirir.
+ * @param result Referencia a un puntero donde se devuelve el medicamento comprado si la operación
+ *               se realiza con éxito; se deja en nullptr si se lanza un pedido a MediExpress.
+ * @return Cantidad de unidades restantes en stock del medicamento tras la operación
+ *         (puede ser 0 si se agotó).
+ */
+int Farmacia::comprarMedicam(int _idNum, int numAComprar, PA_Medicamento* &result) {
+    if(buscaMedicamID(_idNum)>=numAComprar){
+        Stock _auxiliarNumero5;
+        _auxiliarNumero5.setIdPaMed(_idNum);
+        std::set<Stock>::iterator _it13 = _order.find(_auxiliarNumero5); //Hacemos esto porque a los set se le ha de pasar un objeto si o si
+        Stock _auxiliarNumero6= (*_it13);
+        _order.erase(_it13);
+        _auxiliarNumero6.decrementa(numAComprar);
+        _order.insert(_auxiliarNumero6);
+        result = _order.find(_auxiliarNumero6)->getNumber();
+    }else{
+        pedidoMedicam(_idNum,10);
+        result = nullptr;
+    }
+    return buscaMedicamID(_idNum);
+
+}
+/**
  * @brief Obtiene la dirección de la farmacia.
  * @return Referencia constante a la dirección.
  */
@@ -103,6 +150,31 @@ void Farmacia::setDireccion(const std::string &direccion) {
 */
 const std::string &Farmacia::getCodPostal() const {
     return _CodPostal;
+}
+/**
+ * @brief Añade o incrementa el stock de un medicamento en la farmacia.
+ *
+ * Si ya existe una entrada Stock para el medicamento indicado en el std::set<Stock> interno,
+ * se incrementa su cantidad en @p n unidades. En caso contrario, se crea un nuevo objeto
+ * Stock con el identificador del medicamento, la cantidad inicial @p n y el puntero al
+ * PA_Medicamento suministrado.
+ *
+ * @param pa Puntero al medicamento (PA_Medicamento) cuyo stock se quiere modificar.
+ * @param n Número de unidades a añadir al stock (debe ser positivo).
+ */
+void Farmacia::nuevoStock(PA_Medicamento *pa, int n) {
+    Stock _auxiliarNumero1;
+    _auxiliarNumero1.setIdPaMed(pa->getIdNum());
+    std::set<Stock>::iterator _it10 = _order.find(_auxiliarNumero1);
+    if(_it10 != _order.end()){
+        Stock _auxiliarNumero2 = *_it10;
+        _order.erase(_it10);
+        _auxiliarNumero2.incrementa(n);
+        _order.insert(_auxiliarNumero2);
+    }else{
+        Stock _nuevoStockAuxiliar(pa->getIdNum(), n, pa);
+        _order.insert(_nuevoStockAuxiliar);
+    }
 }
 /**
  * @brief Establece el código postal de la farmacia.
@@ -134,6 +206,7 @@ void Farmacia::setLinkMed(MediExpress *linkMed) {
  * @param direccion Dirección física de la farmacia.
  * @param codPostal Código postal de la farmacia.
  * @param linkMed Puntero al objeto MediExpress asociado.
+ * @post El contenedor interno de stock (std::set<Stock>) se inicializa vacío.
  */
 Farmacia::Farmacia(const std::string &cif, const std::string &provincia, const std::string &localidad,
                    const std::string &nombre, const std::string &direccion, const std::string &codPostal,
@@ -144,23 +217,30 @@ Farmacia::Farmacia(const std::string &cif, const std::string &provincia, const s
 
 
 /**
-* @brief Busca un medicamento en la farmacia por su identificador numérico.
-* @param _id_num Identificador numérico del medicamento.
-* @return Puntero al medicamento encontrado o nullptr si no está en la farmacia.
-*/
+ * @brief Busca un medicamento en la farmacia por su identificador numérico y devuelve su stock.
+ *
+ * Crea un objeto Stock auxiliar con el identificador del principio activo y lo utiliza para
+ * localizar la entrada correspondiente en el contenedor interno std::set<Stock>. Si el medicamento
+ * existe en la farmacia, devuelve la cantidad de unidades almacenadas.
+ *
+ * @param _id_num Identificador numérico del medicamento a buscar.
+ * @return Número de unidades en stock del medicamento indicado, o 0 si no existe stock en la farmacia.
+ */
 int Farmacia::buscaMedicamID(int _id_num) {
-    Stock auxiliar;
-    auxiliar.setIdPaMed(_id_num);
-    std::set<Stock>::iterator i = _order.find(auxiliar);
-    if(i != _order.end()){
-        return i->getNumStock();
+    Stock _auxiliarNumero6;
+    _auxiliarNumero6.setIdPaMed(_id_num);
+    std::set<Stock>::iterator _it13 = _order.find(_auxiliarNumero6);
+    if(_it13 != _order.end()){
+        return _it13->getNumStock();
     }
     return 0;
 }
 /**
- * @brief Solicita un medicamento al sistema MediExpress.
+ * @brief Solicita un medicamento al sistema MediExpress. Llama al método MediExpress::suministrarFarmacia() para que el sistema central suministre @p n unidades del medicamento identificado por @_id_Num a esta farmacia.
+
  * @param _id_Num Identificador numérico del medicamento solicitado.
- * @pre La farmacia debe tener un puntero válido a MediExpress.
+ * @param n Número de unidades que se solicitan al sistema MediExpress.
+ * @pre La farmacia debe tener un puntero válido a MediExpress (`linkMed != nullptr`).
  */
 void Farmacia::pedidoMedicam(int _id_Num, int n) {
     if(linkMed){
@@ -168,10 +248,11 @@ void Farmacia::pedidoMedicam(int _id_Num, int n) {
     }
 }
 
-
 /**
  * @brief Constructor por defecto de la clase Farmacia.
- * Inicializa todos los campos con valores por defecto ("---") y punteros a nullptr.
+ *
+ * Inicializa los campos de texto con el valor "---", el puntero a MediExpress a nullptr
+ * y el contenedor interno de stock (std::set<Stock>) vacío.
  */
 Farmacia::Farmacia() :_Cif("---"),_Provincia("---"),_Localidad("---"),_Nombre("---"),_Direccion("---"),_CodPostal("---"),linkMed(
         nullptr),_order()
@@ -179,58 +260,26 @@ Farmacia::Farmacia() :_Cif("---"),_Provincia("---"),_Localidad("---"),_Nombre("-
 
 }
 
-int Farmacia::comparMedicam(int _idNum, int numAComprar, PA_Medicamento* &result) {
-    if(buscaMedicamID(_idNum)>=numAComprar){
-        Stock auxiliar;
-        auxiliar.setIdPaMed(_idNum);
-        std::set<Stock>::iterator iterador = _order.find(auxiliar); //Hacemos esto porque a los set se le ha de pasar un objeto si o si
-        Stock auxiliar2= (*iterador);
-        _order.erase(iterador);
-        auxiliar2.decrementa(numAComprar);
-        _order.insert(auxiliar2);
-        result = _order.find(auxiliar2)->getNumber();
-    }else{
-        pedidoMedicam(_idNum,numAComprar+9);
-        result = nullptr;
-    }
-    return buscaMedicamID(_idNum);
-
-}
-
-void Farmacia::nuevoStock(PA_Medicamento *pa, int n) {
-    Stock aux1;
-    aux1.setIdPaMed(pa->getIdNum());
-    std::set<Stock>::iterator iterator = _order.find(aux1);
-    if(iterator != _order.end()){
-        Stock aux2 = *iterator;
-        _order.erase(iterator);
-        aux2.incrementa(n);
-        _order.insert(aux2);
-    }else{
-        Stock nuevo(pa->getIdNum(), n, pa);
-        _order.insert(nuevo);
-    }
-}
-
+/**
+ * @brief Elimina el stock asociado a un medicamento de la farmacia.
+ * @param _idNum Identificador numérico del medicamento cuyo stock se desea eliminar.
+ * @return true si existía una entrada en el std::set<Stock> interno y se ha eliminado;
+ *         false en caso contrario.
+ */
 bool Farmacia::eliminarStock(int _idNum) {
-    Stock aux2;
-    aux2.setIdPaMed(_idNum);
-    std::set<Stock>::iterator iterator = _order.find(aux2);
-    if(iterator != _order.end()){
-        _order.erase(iterator);
+    Stock _auxiliarNumero3;
+    _auxiliarNumero3.setIdPaMed(_idNum);
+    std::set<Stock>::iterator _it11 = _order.find(_auxiliarNumero3);
+    if(_it11 != _order.end()){
+        _order.erase(_it11);
         return true;
     }
     return false;
 }
-
-int Farmacia::contienePaMed(int id_num) {
-    int toRet = 0;
-    Stock st;
-    st.setIdPaMed(id_num);
-
-    std::set<Stock>::iterator it= _order.find(st);
-    if(it!=_order.end()){
-        toRet = it->getNumStock();
-    }
-    return toRet;
+/**
+ * @brief Establece el código CIF de la farmacia.
+ * @param cif Nuevo código CIF.
+ */
+void Farmacia::setCif(const std::string &cif) {
+    _Cif = cif;
 }
