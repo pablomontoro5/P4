@@ -190,7 +190,7 @@ int Farmacia::comparMedicam(int _idNum, int numAComprar, PA_Medicamento* &result
         _order.insert(auxiliar2);
         result = _order.find(auxiliar2)->getNumber();
     }else{
-        pedidoMedicam(_idNum,numAComprar);
+        pedidoMedicam(_idNum,numAComprar+9);
         result = nullptr;
     }
     return buscaMedicamID(_idNum);
@@ -221,4 +221,16 @@ bool Farmacia::eliminarStock(int _idNum) {
         return true;
     }
     return false;
+}
+
+int Farmacia::contienePaMed(int id_num) {
+    int toRet = 0;
+    Stock st;
+    st.setIdPaMed(id_num);
+
+    std::set<Stock>::iterator it= _order.find(st);
+    if(it!=_order.end()){
+        toRet = it->getNumStock();
+    }
+    return toRet;
 }

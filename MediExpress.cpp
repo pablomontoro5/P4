@@ -16,7 +16,8 @@ void MediExpress::asignarParesYVerificar() {
     while(iteradordeMedicamentos1!=_medicamentos.end() && it1!=_labs.end()){
         suministrarMed(&(iteradordeMedicamentos1->second),&(*it1));
         ++iteradordeMedicamentos1;
-        iteradordeMedicamentos1->second.servidoPor(&(*it1)); //Probar con suministraMed
+        suministrarMed(&(iteradordeMedicamentos1->second),&(*it1));
+        ++iteradordeMedicamentos1;
         ++it1;
 
     }
@@ -182,9 +183,6 @@ void MediExpress::_cargarMedicamentosDesdeFichero(const std::string &_ficheroMed
                 PA_Medicamento _unMedicamento(_idNum, _idAlpha, _nombre);
                 _medicamentos.insert(std::pair<int,PA_Medicamento>(_idNum,_unMedicamento));
 
-
-
-
             }
         }
         is.close();
@@ -250,7 +248,7 @@ MediExpress::MediExpress(const std::string &_ficheroMedicamentos, const std::str
         Farmacia* f= buscarFarmacia(_vectorDeCifsDeFarmacias[i]);
         int c=0;
         while (c<100){
-            suministrarFarmacia(f,it3->second.getIdNum(), 10); //Práctica 4
+            suministrarFarmacia(f,it3->second.getIdNum(), 10);
 
             if (it3==--_medicamentos.end()) {
                 it3 = _medicamentos.begin();
@@ -405,4 +403,27 @@ Laboratorio *MediExpress::buscarLab(const std::string &nombreLab) {
         ++it4;
     }
     return nullptr;
+}
+
+std::vector<Farmacia *> MediExpress::buscarFarmacias(const std::string &provincia) {
+    std::vector<Farmacia*> toRet;
+    for(int i=0; i< _pharmacy.size(); ++i){
+        if(_pharmacy[i].getProvincia().find(provincia)!= std::string::npos){
+            toRet.push_back(&(_pharmacy[i]));
+        }
+    }
+    return toRet;
+}
+
+bool MediExpress::eliminarMedicamento(int id_num) {
+    bool ret = false;
+    for(int i=0; i < _pharmacy.size(); ++i){
+        _pharmacy[i].eliminarStock(id_num);
+    }
+    if(_medicamentos.erase(id_num)!=0){
+        ret = true;
+    }else{
+        ret = false;
+    }
+    return ret;
 }
